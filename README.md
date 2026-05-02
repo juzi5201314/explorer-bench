@@ -77,15 +77,15 @@ omp --model "<provider/model_id>" \
 |    1 | minimax-m2.7                     |   10 |   10 |    9 |      9 |  9.50 |   9m 42s  |
 |    2 | deepseek-v4-flash                |    9 |    9 |    9 |      8 |  8.75 |   3m 57s  |
 |    3 | LongCat-2.0-Preview              |    9 |    9 |    8 |      7 |  8.25 |   6m 25s  |
-    4 | step-3.5-flash                   |    8 |    7 |    8 |      8 |  7.75 |   5m 29s  |
-    5 | kimi-k2-thinking                 |    7 |    7 |    7 |      7 |  7.00 |   3m 14s  |
-    6 | qwen3.5-397b-a17b                |    7 |    7 |    7 |      6 |  6.75² |   5m 59s  |
-    7 | qwen3-next-80b-a3b-thinking      |    6 |    6 |    7 |      7 |  6.50 |   3m 57s  |
-    8 | gemini-3-flash-preview           |    5 |    4 |    5 |      6 |  5.00 |      51s  |
-    9 | gemini-3.1-flash-lite-preview    |    4 |    3 |    4 |      3 |  3.50 |      37s  |
-   10 | nemotron-3-super-120b-a12b       |    2 |    2 |    2 |      5 |  2.75 |   7m 30s  |
-   11 | kimi-k2-0905                     |    1 |    1 |    1 |      1 |  1.00 |     29s¹  |
-   12 | qwen3-next-80b-a3b-instruct      |    0 |    0 |    0 |      0 |  0.00 |  4m 38s¹  |
+|    4 | step-3.5-flash                   |    8 |    7 |    8 |      8 |  7.75 |   5m 29s  |
+|    5 | kimi-k2-thinking                 |    7 |    7 |    7 |      7 |  7.00 |   3m 14s  |
+|    6 | qwen3.5-397b-a17b                |    7 |    7 |    7 |      6 |  6.75² |   5m 59s  |
+|    7 | qwen3-next-80b-a3b-thinking      |    6 |    6 |    7 |      7 |  6.50 |   3m 57s  |
+|    8 | gemini-3-flash-preview           |    5 |    4 |    5 |      6 |  5.00 |      51s  |
+|    9 | gemini-3.1-flash-lite-preview    |    4 |    3 |    4 |      3 |  3.50 |      37s  |
+|   10 | nemotron-3-super-120b-a12b       |    2 |    2 |    2 |      5 |  2.75 |   7m 30s  |
+|   11 | kimi-k2-0905                     |    1 |    1 |    1 |      1 |  1.00 |     29s¹  |
+|   12 | qwen3-next-80b-a3b-instruct      |    0 |    0 |    0 |      0 |  0.00 |  4m 38s¹  |
 
 ¹ 首次运行失败后重跑，详见逐模型观察。
 ² 首次超时/重跑空输出，用户手动第三次运行成功。
