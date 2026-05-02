@@ -41,53 +41,30 @@ Accept any separator: commas, spaces, newlines, Chinese/English punctuation.
 
 ### Phase 2: Execute Model Runs
 
-Run all models **in parallel**. Do NOT run them sequentially.
+Run all models **in parallel**. Issue one `bash` tool call per model, all in the same response, with `run_in_background: true`.
 
-**Per-model command template:**
+**Per-model command:**
 ```bash
-MODEL_ID="<provider/model_id>"
-SAFE_NAME="${MODEL_ID//\//-}"
-DATE=$(date +%F)
-OUTDIR="./outputs/$SAFE_NAME"
-mkdir -p "$OUTDIR"
-
-START=$(date +%s)
-omp --model "$MODEL_ID" -p "$(cat ./input.md)" --thinking high --tools read,bash,find,lsp,search > "$OUTDIR/$DATE.md" 2>&1
-RC=$?
-END=$(date +%s)
-ELAPSED=$((END - START))
-
-echo "{\"model\": \"$MODEL_ID\", \"exit_code\": $RC, \"elapsed_seconds\": $ELAPSED, \"date\": \"$DATE\"}" > "$OUTDIR/$DATE.meta.json"
+./run_benchmark.sh "<provider/model_id>"
 ```
 
-**Tool whitelist rationale:**
-| `read`, `find`, `search`, `lsp` — core exploration: reading files, finding by glob, searching content, code intelligence
-| `bash` — running git, cargo, and system commands
+The script:
+- Strips the provider prefix for the output folder (e.g., `91nv/foo` → `outputs/foo/`)
+- Runs `omp` with the tools whitelist (`read,bash,find,lsp,search`)
+- Enforces a 10-minute timeout per model
+- Writes output to `outputs/<model-id>/YYYY-MM-DD.md` and metadata to `*.meta.json`
 
-Excluded tools and why:
-| `write`, `edit` — prevents models from writing the report to a file instead of stdout
-| `task` — enforces the "no subagents" constraint at the tool level
-| `browser`, `web_search`, `ask` — not needed for local codebase exploration
-| `notebook`, `python` — not needed; reduces attack surface
-
-Store each model's run as a background job. After spawning all jobs, wait for all to complete. Record each model's elapsed time and exit code.
-
-**Parallel execution approach:**
-
-Use a bash script that backgrounds each model run, or use `task` subagents (one per model). Whichever is cleaner — just don't run them one at a time.
-
-When using bash, spawn like:
-```bash
-(run_one_model "anthropic/claude-sonnet-4-20250514") &
-(run_one_model "openai/gpt-4o") &
-wait
+**Parallel execution:** Issue all `bash` calls in one response. Example for 3 models:
 ```
-
-Define `run_one_model` as a function wrapping the command template above.
+bash(run_in_background: true, command: "./run_benchmark.sh \"anthropic/claude-sonnet-4-20250514\"")
+bash(run_in_background: true, command: "./run_benchmark.sh \"openai/gpt-4o\"")
+bash(run_in_background: true, command: "./run_benchmark.sh \"google/gemini-2.5-pro\"")
+```
+After all calls return, collect results from `outputs/<model-id>/`. Do NOT run them one at a time.
 
 **Edge cases:**
-- If `omp` fails for a model (non-zero exit), still save the output and meta — the failure is a data point
-- If `omp` hangs (no output for >10 minutes), kill it and note the timeout
+- If `omp` fails for a model (non-zero exit), the script still saves output and meta — the failure is a data point
+- If a model times out (exit 124), treat as TIMEOUT with score 0
 - Do NOT retry — one attempt per model
 
 ### Phase 3: Judge Outputs
