@@ -52,13 +52,23 @@ OUTDIR="./outputs/$SAFE_NAME"
 mkdir -p "$OUTDIR"
 
 START=$(date +%s)
-omp --model "$MODEL_ID" -p "$(cat ./input.md)" --thinking high > "$OUTDIR/$DATE.md" 2>&1
+omp --model "$MODEL_ID" -p "$(cat ./input.md)" --thinking high --tools read,bash,find,lsp,search > "$OUTDIR/$DATE.md" 2>&1
 RC=$?
 END=$(date +%s)
 ELAPSED=$((END - START))
 
 echo "{\"model\": \"$MODEL_ID\", \"exit_code\": $RC, \"elapsed_seconds\": $ELAPSED, \"date\": \"$DATE\"}" > "$OUTDIR/$DATE.meta.json"
 ```
+
+**Tool whitelist rationale:**
+| `read`, `find`, `search`, `lsp` — core exploration: reading files, finding by glob, searching content, code intelligence
+| `bash` — running git, cargo, and system commands
+
+Excluded tools and why:
+| `write`, `edit` — prevents models from writing the report to a file instead of stdout
+| `task` — enforces the "no subagents" constraint at the tool level
+| `browser`, `web_search`, `ask` — not needed for local codebase exploration
+| `notebook`, `python` — not needed; reduces attack surface
 
 Store each model's run as a background job. After spawning all jobs, wait for all to complete. Record each model's elapsed time and exit code.
 
